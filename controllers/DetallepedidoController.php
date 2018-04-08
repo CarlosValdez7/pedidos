@@ -4,29 +4,80 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Detallepedido;
-use app\models\DetallepedidoSearch;
+use app\models\DetallePedidoSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
+use app\models\Usuarios;
+
 
 /**
- * DetallepedidoController implements the CRUD actions for Detallepedido model.
+ * DetallePedidoController implements the CRUD actions for Detallepedido model.
  */
-class DetallepedidoController extends Controller
+class DetallePedidoController extends Controller
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
+    {return ['access' => [
+        'class' => AccessControl::className(),
+        'only' => [ 'index','view','create','update','delete'],
+        'rules' => [
+            [
+                //El administrador tiene permisos sobre las siguientes acciones
+                'actions' => ['index','view','create','update','delete'
                 ],
+                //Esta propiedad establece que tiene permisos
+                'allow' => false,
+                //Usuarios autenticados, el signo ? es para invitados
+                'roles' => ['@'],
+                //Este método nos permite crear un filtro sobre la identidad del usuario
+                //y así establecer si tiene permisos o no
+                'matchCallback' => function ($rule, $action) {
+                    //Llamada al método que comprueba si es un administrador
+                    return Usuarios::isUserAdmin(Yii::$app->user->identity->username);
+                },
             ],
-        ];
+            [
+                'actions' => ['index','view','create','update','delete'
+                ],
+                //Esta propiedad establece que tiene permisos
+                'allow' => true,
+                //Usuarios autenticados, el signo ? es para invitados
+                'roles' => ['@'],
+                //Este método nos permite crear un filtro sobre la identidad del usuario
+                //y así establecer si tiene permisos o no
+                'matchCallback' => function ($rule, $action) {
+                    //Llamada al método que comprueba si es un administrador
+                    return Usuarios::isUserSimple(Yii::$app->user->identity->username);
+                },
+            ],
+            [
+                'actions' => ['index','view','create','update','delete'
+                ],
+                //Esta propiedad establece que tiene permisos
+                'allow' => false,
+                //Usuarios autenticados, el signo ? es para invitados
+                'roles' => ['?'],
+                //Este método nos permite crear un filtro sobre la identidad del usuario
+                //y así establecer si tiene permisos o no
+                'matchCallback' => function ($rule, $action) {
+                    //Llamada al método que comprueba si es un administrador
+
+                },
+            ],
+        ],
+    ],
+
+        'verbs' => [
+            'class' => VerbFilter::className(),
+            'actions' => [
+                'delete' => ['POST'],
+            ],
+        ],
+    ];
     }
 
     /**
@@ -35,7 +86,7 @@ class DetallepedidoController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new DetallepedidoSearch();
+        $searchModel = new DetallePedidoSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -64,16 +115,25 @@ class DetallepedidoController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Detallepedido();
+        $transaction = Detallepedido::getDb()->beginTransaction();
+        try {
+            $model = new Detallepedido();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $transaction->commit();
+                return $this->redirect(['create']);
+            } }catch(\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+
         }
 
         return $this->render('create', [
             'model' => $model,
         ]);
     }
+
+
 
     /**
      * Updates an existing Detallepedido model.
@@ -84,12 +144,20 @@ class DetallepedidoController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $transaction = Detallepedido::getDb()->beginTransaction();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        try {
+            $model = $this->findModel($id);
+
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $transaction->commit();
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+
         }
-
         return $this->render('update', [
             'model' => $model,
         ]);
@@ -104,8 +172,17 @@ class DetallepedidoController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
 
+        $transaction = Detallepedido::getDb()->beginTransaction();
+
+        try {
+            $this->findModel($id)->delete();
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+
+        }
         return $this->redirect(['index']);
     }
 

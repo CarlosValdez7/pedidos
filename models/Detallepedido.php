@@ -12,6 +12,9 @@ use Yii;
  * @property string $precio
  * @property int $pedidoid
  * @property int $productoid
+ *
+ * @property Pedido $pedido
+ * @property Producto $producto
  */
 class Detallepedido extends \yii\db\ActiveRecord
 {
@@ -29,11 +32,12 @@ class Detallepedido extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id'], 'required'],
-            [['id', 'cantidad', 'pedidoid', 'productoid'], 'default', 'value' => null],
-            [['id', 'cantidad', 'pedidoid', 'productoid'], 'integer'],
+            [['cantidad', 'precio', 'pedidoid', 'productoid'], 'required'],
+            [['cantidad', 'pedidoid', 'productoid'], 'default', 'value' => null],
+            [['cantidad', 'pedidoid', 'productoid'], 'integer'],
             [['precio'], 'number'],
-            [['id'], 'unique'],
+            [['pedidoid'], 'exist', 'skipOnError' => true, 'targetClass' => Pedido::className(), 'targetAttribute' => ['pedidoid' => 'id']],
+            [['productoid'], 'exist', 'skipOnError' => true, 'targetClass' => Producto::className(), 'targetAttribute' => ['productoid' => 'id']],
         ];
     }
 
@@ -49,5 +53,21 @@ class Detallepedido extends \yii\db\ActiveRecord
             'pedidoid' => 'Pedidoid',
             'productoid' => 'Productoid',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPedido()
+    {
+        return $this->hasOne(Pedido::className(), ['id' => 'pedidoid']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProducto()
+    {
+        return $this->hasOne(Producto::className(), ['id' => 'productoid']);
     }
 }

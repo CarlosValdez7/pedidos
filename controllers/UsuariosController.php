@@ -2,24 +2,19 @@
 
 namespace app\controllers;
 
-
 use Yii;
-use app\models\Pedido;
-
-use app\models\PedidoSearch;
+use app\models\Usuarios;
+use app\models\UsuariosSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use app\models\Usuarios;
 use yii\filters\AccessControl;
 
 
-
-
 /**
- * PedidoController implements the CRUD actions for Pedido model.
+ * UsuariosController implements the CRUD actions for Usuarios model.
  */
-class PedidoController extends Controller
+class UsuariosController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -85,12 +80,12 @@ class PedidoController extends Controller
     }
 
     /**
-     * Lists all Pedido models.
+     * Lists all Usuarios models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new PedidoSearch();
+        $searchModel = new UsuariosSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -100,7 +95,7 @@ class PedidoController extends Controller
     }
 
     /**
-     * Displays a single Pedido model.
+     * Displays a single Usuarios model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -113,29 +108,16 @@ class PedidoController extends Controller
     }
 
     /**
-     * Creates a new Pedido model.
+     * Creates a new Usuarios model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
+        $model = new Usuarios();
 
-        $transaction = Pedido::getDb()->beginTransaction();
-        try {
-            $model = new Pedido();
-
-            $model->fecha=date("d/m/Y");
-
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                $transaction->commit();
-                return $this->redirect(['detalle-pedido/create']);
-
-            }
-
-        }catch(\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
 
         return $this->render('create', [
@@ -144,7 +126,7 @@ class PedidoController extends Controller
     }
 
     /**
-     * Updates an existing Pedido model.
+     * Updates an existing Usuarios model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -152,26 +134,19 @@ class PedidoController extends Controller
      */
     public function actionUpdate($id)
     {
-        $transaction = Pedido::getDb()->beginTransaction();
-        try {
-            $model = $this->findModel($id);
+        $model = $this->findModel($id);
 
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                $transaction->commit();
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
         }
+
         return $this->render('update', [
             'model' => $model,
         ]);
     }
 
     /**
-     * Deletes an existing Pedido model.
+     * Deletes an existing Usuarios model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -179,29 +154,21 @@ class PedidoController extends Controller
      */
     public function actionDelete($id)
     {
-        $transaction = Pedido::getDb()->beginTransaction();
-        try {
-            $this->findModel($id)->delete();
-            $transaction->commit();
+        $this->findModel($id)->delete();
 
-        }catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-
-        }
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Pedido model based on its primary key value.
+     * Finds the Usuarios model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Pedido the loaded model
+     * @return Usuarios the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Pedido::findOne($id)) !== null) {
+        if (($model = Usuarios::findOne($id)) !== null) {
             return $model;
         }
 

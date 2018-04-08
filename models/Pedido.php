@@ -10,6 +10,9 @@ use Yii;
  * @property int $id
  * @property string $fecha
  * @property int $clienteid
+ *
+ * @property Detallepedido[] $detallepedidos
+ * @property Cliente $cliente
  */
 class Pedido extends \yii\db\ActiveRecord
 {
@@ -27,11 +30,11 @@ class Pedido extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id'], 'required'],
-            [['id', 'clienteid'], 'default', 'value' => null],
-            [['id', 'clienteid'], 'integer'],
             [['fecha'], 'safe'],
-            [['id'], 'unique'],
+            [['clienteid'], 'required'],
+            [['clienteid'], 'default', 'value' => null],
+            [['clienteid'], 'integer'],
+            [['clienteid'], 'exist', 'skipOnError' => true, 'targetClass' => Cliente::className(), 'targetAttribute' => ['clienteid' => 'id']],
         ];
     }
 
@@ -45,5 +48,21 @@ class Pedido extends \yii\db\ActiveRecord
             'fecha' => 'Fecha',
             'clienteid' => 'Clienteid',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDetallepedidos()
+    {
+        return $this->hasMany(Detallepedido::className(), ['pedidoid' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCliente()
+    {
+        return $this->hasOne(Cliente::className(), ['id' => 'clienteid']);
     }
 }

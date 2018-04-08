@@ -9,6 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\User;
+use app\models\Usuarios;
 
 class SiteController extends Controller
 {
@@ -20,21 +22,49 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['logout'],
+                'only' => ['logout', 'user', 'admin'],
                 'rules' => [
                     [
-                        'actions' => ['logout'],
+                        //El administrador tiene permisos sobre las siguientes acciones
+                        'actions' => ['logout', 'admin',
+                        ],
+                        //Esta propiedad establece que tiene permisos
                         'allow' => true,
+                        //Usuarios autenticados, el signo ? es para invitados
                         'roles' => ['@'],
+                        //Este método nos permite crear un filtro sobre la identidad del usuario
+                        //y así establecer si tiene permisos o no
+                        'matchCallback' => function ($rule, $action) {
+                            //Llamada al método que comprueba si es un administrador
+                            return User::isUserAdmin(Yii::$app->user->identity->username);
+                        },
+                    ],
+                    [
+                        //Los usuarios simples tienen permisos sobre las siguientes acciones
+                        'actions' => ['logout', 'user'],
+                        //Esta propiedad establece que tiene permisos
+                        'allow' => true,
+                        //Usuarios autenticados, el signo ? es para invitados
+                        'roles' => ['@'],
+                        //Este método nos permite crear un filtro sobre la identidad del usuario
+                        //y así establecer si tiene permisos o no
+                        'matchCallback' => function ($rule, $action) {
+                            //Llamada al método que comprueba si es un usuario simple
+                            return User::isUserSimple(Yii::$app->user->identity->username);
+                        },
                     ],
                 ],
             ],
+            //Controla el modo en que se accede a las acciones, en este ejemplo a la acción logout
+            //sólo se puede acceder a través del método post
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'logout' => ['post'],
+                    'delete' => ['post'],
+                    'accessRules'
                 ],
             ],
+
         ];
     }
 

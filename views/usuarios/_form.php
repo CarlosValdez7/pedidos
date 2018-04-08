@@ -4,21 +4,19 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Detallepedido */
+/* @var $model app\models\Usuarios */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="detallepedido-form">
+<div class="usuarios-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cantidad')->textInput() ?>
+    <?= $form->field($model, 'rol')->textInput() ?>
 
-    <?= $form->field($model, 'precio')->textInput() ?>
+    <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'pedidoid')->textInput() ?>
-
-    <?= $form->field($model, 'productoid')->textInput() ?>
+    <?= $form->field($model, 'password')->passwordInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

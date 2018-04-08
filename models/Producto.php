@@ -10,6 +10,8 @@ use Yii;
  * @property int $id
  * @property string $nombrep
  * @property string $preciosugerido
+ *
+ * @property Detallepedido[] $detallepedidos
  */
 class Producto extends \yii\db\ActiveRecord
 {
@@ -27,12 +29,9 @@ class Producto extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id'], 'required'],
-            [['id'], 'default', 'value' => null],
-            [['id'], 'integer'],
+            [['nombrep', 'preciosugerido'], 'required'],
             [['preciosugerido'], 'number'],
             [['nombrep'], 'string', 'max' => 255],
-            [['id'], 'unique'],
         ];
     }
 
@@ -46,5 +45,13 @@ class Producto extends \yii\db\ActiveRecord
             'nombrep' => 'Nombrep',
             'preciosugerido' => 'Preciosugerido',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDetallepedidos()
+    {
+        return $this->hasMany(Detallepedido::className(), ['productoid' => 'id']);
     }
 }

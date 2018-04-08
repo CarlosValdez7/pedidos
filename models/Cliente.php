@@ -10,6 +10,8 @@ use Yii;
  * @property int $id
  * @property string $rfc
  * @property string $razonsocial
+ *
+ * @property Pedido[] $pedidos
  */
 class Cliente extends \yii\db\ActiveRecord
 {
@@ -27,12 +29,10 @@ class Cliente extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id'], 'required'],
-            [['id'], 'default', 'value' => null],
-            [['id'], 'integer'],
+            [['rfc'], 'required'],
             [['rfc'], 'string', 'max' => 13],
             [['razonsocial'], 'string', 'max' => 255],
-            [['id'], 'unique'],
+            [['rfc'], 'unique'],
         ];
     }
 
@@ -46,5 +46,13 @@ class Cliente extends \yii\db\ActiveRecord
             'rfc' => 'Rfc',
             'razonsocial' => 'Razonsocial',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPedidos()
+    {
+        return $this->hasMany(Pedido::className(), ['clienteid' => 'id']);
     }
 }
